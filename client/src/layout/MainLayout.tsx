@@ -1,11 +1,23 @@
-import React from 'react'
+import Footer from "@/components/Footer"
+import Navbar from "@/components/Navbar"
+import { Outlet } from "react-router-dom"
 
-type Props = {}
-
-const MainLayout = (props: Props) => {
+const MainLayout = () => {
   return (
-    <div>MainLayout</div>
+    <div className="flex flex-col min-h-screen m-2 md:m-0">
+      <header>
+
+      <Navbar/>
+      </header>
+      {/* main content */}
+      <div className="flex-1">
+        <Outlet/>
+      </div>
+      {/* footer */}
+      <footer>
+        <Footer/>
+      </footer>
+    </div>
   )
 }
-
 export default MainLayout

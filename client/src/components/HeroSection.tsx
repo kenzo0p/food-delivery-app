@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { Input } from "./ui/input";
 import { Search } from "lucide-react";
 import { Button } from "./ui/button";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
   const [searchText, setSearchText] = useState<string>("");
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col md:flex-row max-w-7xl mx-auto md:p-10 rounded-lg  items-center justify-center gap-20 m-4">
       <div className="flex flex-col gap-20 md:w[40%]">
@@ -19,13 +21,14 @@ const HeroSection = () => {
         <div className="relative flex items-center gap-2 ">
           <Input
             type="text"
-            placeholder=""
+            placeholder="Search restaurant by name, city & country"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             className="px-10  shadow-lg"
+          
           />
           <Search className="text-gray-500 absolute inset-y-2 left-2 pointer-events-none" />
-          <Button className="bg-orange hover:bg-hoverOrange">Search</Button>
+          <Button onClick={() => navigate(`/search/${searchText}`) } className="bg-orange hover:bg-hoverOrange">Search</Button>
         </div>
       </div>
       <div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import {
   Table,
@@ -11,8 +11,10 @@ import {
 } from "./ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { icons, Minus, Plus } from "lucide-react";
+import CheckoutConfirmPage from "./CheckoutConfirmPage,";
 
 const Cart = () => {
+  const [open, setOpen] = useState<boolean>(false);
   return (
     <div className="flex flex-col max-w-7xl mx-auto my-10">
       <div className="flex justify-end">
@@ -65,22 +67,27 @@ const Cart = () => {
                 </Button>
               </div>
             </TableCell>
-            <TableCell>
-                80 ₹
-            </TableCell>
+            <TableCell>80 ₹</TableCell>
             <TableCell className="text-right">
-                <Button size={"sm"} className="bg-orange hover:bg-hoverOrange ">Remove</Button>
+              <Button size={"sm"} className="bg-orange hover:bg-hoverOrange ">
+                Remove
+              </Button>
             </TableCell>
           </TableRow>
         </TableBody>
         <TableFooter>
-            <TableCell colSpan={5}>Total</TableCell>
-            <TableCell className="text-right">80 ₹</TableCell>
+          <TableRow className="text-2xl font-bold">
+          <TableCell colSpan={5}>Total</TableCell>
+          <TableCell className="text-right">80 ₹</TableCell>
+          </TableRow>
         </TableFooter>
       </Table>
       <div className="flex justify-end my-5">
-        <Button className="bg-orange hover:bg-hoverOrange">Proceed To Checkout</Button>
+        <Button onClick={() => setOpen(true)} className="bg-orange hover:bg-hoverOrange">
+          Proceed To Checkout
+        </Button>
       </div>
+      <CheckoutConfirmPage open={open} setOpen={setOpen} />
     </div>
   );
 };

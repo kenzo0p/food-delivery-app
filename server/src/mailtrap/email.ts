@@ -76,7 +76,6 @@ export const sendPasswordResetEmail = async (
 };
 export const sendResetSuccessEamil = async (
   email: string,
-  resetUrl: string
 ) => {
   const recipients = [
     {

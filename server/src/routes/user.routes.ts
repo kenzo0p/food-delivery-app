@@ -8,15 +8,15 @@ import {
   signUp,
   updateProfile,
 } from "../controllers/user.controller";
-import { isAuhtenticated } from "../middlewares/isAuthenticated.middleware";
+import { isAuthenticated } from "../middlewares/isAuthenticated.middleware";
 const router = express.Router();
-router.route("/check-auth").get(isAuhtenticated, chechAuth);
+router.route("/check-auth").get(isAuthenticated, chechAuth);
 router.route("/signup").post(signUp);
 router.route("/login").post(login);
 router.route("/logout").post(logout);
 router.route("/verify-email").post(verifyEmail);
 router.route("/forgot-password").post(forgotPassword);
 router.route("/reset-password/:token").post(resetPassword);
-router.route("/profile/update").post(isAuhtenticated, updateProfile);
+router.route("/profile/update").post(isAuthenticated, updateProfile);
 
 export default router;

@@ -1,10 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectDb from "./src/db/connectDB";
-import userRoute from "./src/routes/user.routes";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import userRoute from "./src/routes/user.routes";
+import restaurantRoute from "./src/routes/restaurant.routes";
 
 dotenv.config();
 const app = express();
@@ -22,6 +23,7 @@ const corsoptions = {
 app.use(cors(corsoptions));
 // api
 app.use("/api/v1/user", userRoute);
+app.use("/api/v1/restaurant", restaurantRoute);
 
 app.listen(PORT, () => {
   connectDb();

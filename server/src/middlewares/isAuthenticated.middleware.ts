@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 declare global {
   namespace Express {
@@ -8,7 +8,7 @@ declare global {
     }
   }
 }
-export const isAuhtenticated = async (
+export const isAuthenticated = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -22,7 +22,7 @@ export const isAuhtenticated = async (
       });
     }
     // verify the token
-    const decode = jwt.verify(token, process.env.SECRET_KEY!) as JwtPayload;
+    const decode = jwt.verify(token, process.env.SECRET_KEY!) as jwt.JwtPayload;
     // check if decoding was successfull
     if (!decode) {
       return res.status(400).json({

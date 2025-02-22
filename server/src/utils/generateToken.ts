@@ -4,12 +4,16 @@ import { Response } from "express";
 
 export const generateToken = (res: Response, user: IUserDocument) => {
   const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY!, {
-    expiresIn: "1D",
+    expiresIn: "1d",
   });
+
   res.cookie("token", token, {
     httpOnly: true,
-    sameSite: "strict",
-    maxAge: 24 * 60 * 0 * 1000,
+    secure: true,
+    sameSite: "strict", // change to 'strict' in production
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+    path: '/', // important!
   });
+  
   return token;
 };

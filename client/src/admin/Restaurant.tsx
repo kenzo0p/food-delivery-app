@@ -1,7 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RestaurantFormScema, restaurantFormSchema } from "@/schema/restaurantSchema";
+import {
+  RestaurantFormScema,
+  restaurantFormSchema,
+} from "@/schema/restaurantSchema";
+import { useRestaurantStore } from "@/store/useRestaurantStore";
 import { Loader2 } from "lucide-react";
 import React, { useState } from "react";
 
@@ -14,25 +18,43 @@ const Restaurant = () => {
     cuisines: [],
     imageFile: undefined,
   });
-  const [error , setError] = useState<Partial<RestaurantFormScema>>({});
+  const { createRestaurant, updateRestaurant, loading, restaurant } =
+    useRestaurantStore();
+  const [error, setError] = useState<Partial<RestaurantFormScema>>({});
   const changeEventHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value , type } = e.target;
-    setInput({ ...input, [name]:type === 'number' ? Number(value) :  value });
+    const { name, value, type } = e.target;
+    setInput({ ...input, [name]: type === "number" ? Number(value) : value });
   };
-  const submitHandler = (e:React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-
     const result = restaurantFormSchema.safeParse(input);
-    if(!result.success){
+    if (!result.success) {
       const fieldErrors = result.error.formErrors.fieldErrors;
-      setError(fieldErrors as Partial <RestaurantFormScema>);
+      setError(fieldErrors as Partial<RestaurantFormScema>);
     }
+    const formData = new FormData();
+    formData.append("restaurantName", input.restaurantName);
+    formData.append("city", input.city);
+    formData.append("country", input.country);
+    formData.append("deliveryTime", input.deliveryTime.toString());
+    formData.append("cuisines", JSON.stringify(input.cuisines));
 
-    console.log(input);
-  }
-  const loading = false;
-  const restaurant = false;
+    if (input.imageFile) {
+      formData.append("imageFile", input.imageFile);
+    }
+    if (restaurant) {
+      // update
+      await updateRestaurant(formData);
+
+    }
+    try {
+    } catch (error) {
+      console.log(error);
+    }
+    // console.log(input);
+  };
+
   return (
     <div className="max-w-6xl mx-auto my-10">
       <div>
@@ -50,9 +72,11 @@ const Restaurant = () => {
                   name="restaurantName"
                   placeholder="Enter your restaurant name"
                 />
-                {
-                  error && <span className="text-red-500 text-xs font-medium">{error.restaurantName}</span>
-                }
+                {error && (
+                  <span className="text-red-500 text-xs font-medium">
+                    {error.restaurantName}
+                  </span>
+                )}
               </div>
               <div>
                 <Label>City</Label>
@@ -63,9 +87,11 @@ const Restaurant = () => {
                   name="city"
                   placeholder="Enter your city"
                 />
-                 {
-                  error && <span className="text-red-500 text-xs font-medium">{error.city}</span>
-                }
+                {error && (
+                  <span className="text-red-500 text-xs font-medium">
+                    {error.city}
+                  </span>
+                )}
               </div>
               <div>
                 <Label>Country</Label>
@@ -76,9 +102,11 @@ const Restaurant = () => {
                   name="country"
                   placeholder="Enter your country name"
                 />
-                 {
-                  error && <span className="text-red-500 text-xs font-medium">{error.country}</span>
-                }
+                {error && (
+                  <span className="text-red-500 text-xs font-medium">
+                    {error.country}
+                  </span>
+                )}
               </div>
               <div>
                 <Label>Estimate Delivery Time Name</Label>
@@ -89,35 +117,47 @@ const Restaurant = () => {
                   name="deliveryTime"
                   placeholder="Enter your delivery time"
                 />
-                 {
-                  error && <span className="text-red-500 text-xs font-medium">{error.deliveryTime}</span>
-                }
+                {error && (
+                  <span className="text-red-500 text-xs font-medium">
+                    {error.deliveryTime}
+                  </span>
+                )}
               </div>
               <div>
                 <Label>Cuisines</Label>
                 <Input
                   value={input.cuisines}
-                  onChange={(e)=>setInput({...input ,cuisines:e.target.value.split(",")})}
+                  onChange={(e) =>
+                    setInput({ ...input, cuisines: e.target.value.split(",") })
+                  }
                   type="text"
                   name="cuisines"
                   placeholder="e.g. Momos , Biryani"
                 />
-                 {
-                  error && <span className="text-red-500 text-xs font-medium">{error.cuisines}</span>
-                }
+                {error && (
+                  <span className="text-red-500 text-xs font-medium">
+                    {error.cuisines}
+                  </span>
+                )}
               </div>
               <div>
                 <Label>Upload Restaurant Image</Label>
                 <Input
-                  
-                  onChange={(e) => setInput({...input , imageFile:e.target.files?.[0] || undefined})}
+                  onChange={(e) =>
+                    setInput({
+                      ...input,
+                      imageFile: e.target.files?.[0] || undefined,
+                    })
+                  }
                   type="file"
                   accept="image/*"
                   name="imageFile"
                 />
-                 {
-                  error && <span className="text-red-500 text-xs font-medium">{error.imageFile?.name || "Image file is required"}</span>
-                }
+                {error && (
+                  <span className="text-red-500 text-xs font-medium">
+                    {error.imageFile?.name || "Image file is required"}
+                  </span>
+                )}
               </div>
             </div>
             <div className="my-5 w-fit">

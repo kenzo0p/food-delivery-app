@@ -1,8 +1,8 @@
-
 import { MailtrapClient } from "mailtrap";
-const TOKEN = process.env.MAILTRAP_API_TOKEN!;
+import dotenv from "dotenv";
+dotenv.config();
 export const client = new MailtrapClient({
-  token: TOKEN,
+  token: process.env.MAILTRAP_API_TOKEN!,
 });
 
 export const sender = {

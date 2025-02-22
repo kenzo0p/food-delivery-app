@@ -12,8 +12,9 @@ export const isAuthenticated = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+) : Promise<any> => {
   try {
+    // console.log("Cookies received:", req.cookies); // Add this
     const token = req.cookies.token;
     if (!token) {
       return res.status(401).json({
@@ -21,6 +22,7 @@ export const isAuthenticated = async (
         message: "User not authenticated",
       });
     }
+    // console.log("Token found, verifying..."); // Add this
     // verify the token
     const decode = jwt.verify(token, process.env.SECRET_KEY!) as jwt.JwtPayload;
     // check if decoding was successfull

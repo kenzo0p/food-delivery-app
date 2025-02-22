@@ -66,7 +66,7 @@ const orderSchema = new mongoose.Schema<IOrder>(
           required: true,
         },
         name: {
-          typo: String,
+          type: String,
           required: true,
         },
         image: {

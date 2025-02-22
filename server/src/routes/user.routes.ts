@@ -7,6 +7,7 @@ import {
   resetPassword,
   signUp,
   updateProfile,
+  verifyEmail,
 } from "../controllers/user.controller";
 import { isAuthenticated } from "../middlewares/isAuthenticated.middleware";
 const router = express.Router();

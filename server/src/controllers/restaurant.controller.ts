@@ -3,7 +3,7 @@ import { Restaurant } from "../models/restaurant.model";
 import { Multer } from "multer";
 import uploadImageOnCloudinary from "../utils/imageUpload";
 import { Order } from "../models/order.model";
-export const createRestaurant = async (req: Request, res: Response) => {
+export const createRestaurant = async (req: Request, res: Response) :Promise<any> => {
   try {
     const { restaurantName, city, country, price, deliveryTime, cuisines } =
       req.body;
@@ -38,12 +38,12 @@ export const createRestaurant = async (req: Request, res: Response) => {
       .json({ message: "Interval server error", success: false });
   }
 };
-export const getRestaurant = async (req: Request, res: Response) => {
+export const getRestaurant = async (req: Request, res: Response): Promise<any> => {
   try {
     const restaurant = await Restaurant.findOne({ user: req.id });
     if (!restaurant) {
       return res
-        .status(400)
+        .status(404)
         .json({ success: false, message: "Restaurant not found" });
     }
     return res.status(200).json({ restaurant, success: true });
@@ -55,7 +55,7 @@ export const getRestaurant = async (req: Request, res: Response) => {
   }
 };
 
-export const updateRestaurant = async (req: Request, res: Response) => {
+export const updateRestaurant = async (req: Request, res: Response) :Promise<any> => {
   try {
     const { restaurantName, city, country, deliveryTime, cuisines } = req.body;
     const file = req.file;
@@ -89,7 +89,7 @@ export const updateRestaurant = async (req: Request, res: Response) => {
       .json({ message: "Internal server error", success: false });
   }
 };
-export const getRestaurantOrder  = async (req: Request, res: Response) => {
+export const getRestaurantOrder  = async (req: Request, res: Response) :Promise<any> => {
   try {
     const restaurant = await Restaurant.findOne({ user: req.id });
     if (!restaurant) {
@@ -113,7 +113,7 @@ export const getRestaurantOrder  = async (req: Request, res: Response) => {
       .json({ message: "Internal server error", success: false });
   }
 };
-export const updatedOrderStatus = async (req: Request, res: Response) => {
+export const updatedOrderStatus = async (req: Request, res: Response) :Promise<any> => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
@@ -133,7 +133,7 @@ export const updatedOrderStatus = async (req: Request, res: Response) => {
       .json({ message: "Internal server error", succcess: false });
   }
 };
-export const searchRestaurant = async (req: Request, res: Response) => {
+export const searchRestaurant = async (req: Request, res: Response) :Promise<any> => {
   try {
     const searchText = req.params.searchText || "";
     const searchQuery = (req.query.searchQuery as string) || "";
@@ -169,7 +169,7 @@ export const searchRestaurant = async (req: Request, res: Response) => {
       .json({ message: "Internal server error", success: false });
   }
 };
-export const getSingleRestaurant = async (req: Request, res: Response) => {
+export const getSingleRestaurant = async (req: Request, res: Response) :Promise<any> => {
   try {
     const restaurantId = req.params.id;
     const restaurant = await Restaurant.findOne({ restaurantId }).populate({

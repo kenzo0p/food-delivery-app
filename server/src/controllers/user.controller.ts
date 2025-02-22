@@ -5,8 +5,8 @@ import crypto from "crypto";
 import cloudinary from "../utils/cloudinary";
 import { generateVerificatioinToken } from "../utils/generateVerificationCode";
 import { generateToken } from "../utils/generateToken";
-import { sendEmailverification, sendPasswordResetEmail, sendResetSuccessEamil, sendWelcomeEamil } from "../mailtrap/email";
-export const signUp = async (req: Request, res: Response) => {
+import { sendPasswordResetEmail, sendResetSuccessEmail, sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/email";
+export const signUp = async (req: Request, res: Response): Promise<any> => {
   try {
     const { fullname, email, password, contact } = req.body;
     let user = await User.findOne({ email });
@@ -27,14 +27,14 @@ export const signUp = async (req: Request, res: Response) => {
       verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
     });
     generateToken(res, user);
-    await sendEmailverification (email , verificationToken);
+    await sendVerificationEmail(email, verificationToken);
     const userWithoutPassword = await User.findOne({ email }).select(
       "-password"
     );
     return res.status(201).json({
       suceess: true,
       message: "Account created successfully",
-      userWithoutPassword,
+      user: userWithoutPassword,
     });
   } catch (error) {
     console.log(error, "Error during the signup user");
@@ -42,7 +42,7 @@ export const signUp = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<any> => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -59,7 +59,7 @@ export const login = async (req: Request, res: Response) => {
         message: "Incorrect email or password",
       });
     }
-    generateToken(res,user)
+    generateToken(res, user);
     user.lastLogin = new Date();
     await user.save();
     // send user without password
@@ -77,7 +77,10 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const verifyEmail = async (req: Request, res: Response) => {
+export const verifyEmail = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { verificationCode } = req.body;
     const user = await User.findOne({
@@ -95,10 +98,10 @@ export const verifyEmail = async (req: Request, res: Response) => {
     user.verificationTokenExpiresAt = undefined;
     await user.save();
     // send welcome email
-    await sendWelcomeEamil(user.email , user.fullname)
+    await sendWelcomeEmail(user.email, user.fullname);
     return res.status(200).json({
       success: true,
-      message: "Email verifiend successfully",
+      message: "Email verified successfully",
       user,
     });
   } catch (error) {
@@ -106,18 +109,25 @@ export const verifyEmail = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Failed to verify email" });
   }
 };
-export const logout = (req: Request, res: Response) => {
+export const logout = (req: Request, res: Response): Promise<any> => {
   try {
-    return res.clearCookie("token").status(200).json({
-      message: "User Logged Out Successfully",
-      success: true,
-    });
+    return Promise.resolve(
+      res.clearCookie("token").status(200).json({
+        message: "User Logged Out Successfully",
+        success: true,
+      })
+    );
   } catch (error) {
     console.log(error, "Error while logout user");
-    return res.status(500).json({ message: "Failed to logout" });
+    return Promise.reject(
+      res.status(500).json({ message: "Failed to logout" })
+    );
   }
 };
-export const forgotPassword = async (req: Request, res: Response) => {
+export const forgotPassword = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
@@ -134,7 +144,10 @@ export const forgotPassword = async (req: Request, res: Response) => {
     user.resetPasswordTokenExpiresAt = resetTokenExpiresAt;
     await user.save();
     // send email
-    await sendPasswordResetEmail(user.email , `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`)
+    await sendPasswordResetEmail(
+      user.email,
+      `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`
+    );
     return res.status(200).json({
       success: true,
       message: "Password reset link sent to your email",
@@ -147,7 +160,10 @@ export const forgotPassword = async (req: Request, res: Response) => {
     });
   }
 };
-export const resetPassword = async (req: Request, res: Response) => {
+export const resetPassword = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { token } = req.params;
     const { newPassword } = req.body;
@@ -168,7 +184,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     user.resetPasswordTokenExpiresAt = undefined;
     await user.save();
     // send success resetemail
-    await sendResetSuccessEamil(user.email);
+    await sendResetSuccessEmail(user.email);
     return res
       .status(200)
       .json({ success: true, message: "Password reset successfully" });
@@ -181,10 +197,10 @@ export const resetPassword = async (req: Request, res: Response) => {
   }
 };
 
-export const chechAuth = async (req: Request, res: Response) => {
+export const chechAuth = async (req: Request, res: Response): Promise<any> => {
   try {
     const userId = req.id;
-    const user = await User.findById({ userId }).select("-password");
+    const user = await User.findById(userId).select("-password");
     if (!user) {
       return res
         .status(404)
@@ -203,7 +219,10 @@ export const chechAuth = async (req: Request, res: Response) => {
   }
 };
 
-export const updateProfile = async (req: Request, res: Response) => {
+export const updateProfile = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const userId = req.id;
     const { fullname, email, address, city, country, profilePicture } =

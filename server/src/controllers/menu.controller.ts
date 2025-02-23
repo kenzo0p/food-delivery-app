@@ -14,7 +14,7 @@ export const addMenu = async (req: Request, res: Response): Promise<any> => {
         .json({ success: false, message: "Image is required" });
     }
     const imageUrl = await uploadImageOnCloudinary(file as Express.Multer.File);
-    const menu  :any = await Menu.create({
+    const menu: any = await Menu.create({
       name,
       description,
       price,
@@ -27,7 +27,7 @@ export const addMenu = async (req: Request, res: Response): Promise<any> => {
     }
     return res
       .status(201)
-      .json({ success: true, message: "Menu added successfully" });
+      .json({ success: true, menu, message: "Menu added successfully" });
   } catch (error) {
     console.log(error);
     return res
@@ -59,6 +59,11 @@ export const editMenu = async (req: Request, res: Response): Promise<any> => {
     await menu.save();
     return res
       .status(200)
-      .json({ success: true, message: "Menu updated successfully" });
-  } catch (error) {}
+      .json({ success: true, menu, message: "Menu updated successfully" });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
 };

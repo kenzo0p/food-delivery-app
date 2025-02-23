@@ -5,9 +5,10 @@ import uploadImageOnCloudinary from "../utils/imageUpload";
 import { Order } from "../models/order.model";
 export const createRestaurant = async (req: Request, res: Response) :Promise<any> => {
   try {
-    const { restaurantName, city, country, price, deliveryTime, cuisines } =
+    const { restaurantName, city, country, deliveryTime, cuisines } =
       req.body;
     const file = req.file;
+    // console.log(file ,restaurantName, );
     const restaurant = await Restaurant.findOne({ user: req.id });
     if (restaurant) {
       return res.status(400).json({
@@ -21,6 +22,7 @@ export const createRestaurant = async (req: Request, res: Response) :Promise<any
         .json({ success: false, message: "Image is required" });
     }
     const imageUrl = await uploadImageOnCloudinary(file as Express.Multer.File);
+    // console.log(imageUrl);
     await Restaurant.create({
       user: req.id,
       restaurantName,
@@ -40,11 +42,11 @@ export const createRestaurant = async (req: Request, res: Response) :Promise<any
 };
 export const getRestaurant = async (req: Request, res: Response): Promise<any> => {
   try {
-    const restaurant = await Restaurant.findOne({ user: req.id });
+    const restaurant = await Restaurant.findOne({ user: req.id }).populate('menus');
     if (!restaurant) {
       return res
         .status(404)
-        .json({ success: false, message: "Restaurant not found" });
+        .json({ success: false, restaurant:[],message: "Restaurant not found" });
     }
     return res.status(200).json({ restaurant, success: true });
   } catch (error) {
@@ -59,7 +61,7 @@ export const updateRestaurant = async (req: Request, res: Response) :Promise<any
   try {
     const { restaurantName, city, country, deliveryTime, cuisines } = req.body;
     const file = req.file;
-    const restaurant = await Restaurant.findByIdAndUpdate({ user: req.id });
+    const restaurant = await Restaurant.findOne({ user: req.id });
     if (!restaurant) {
       return res
         .status(404)
@@ -74,7 +76,7 @@ export const updateRestaurant = async (req: Request, res: Response) :Promise<any
       const imageUrl = await uploadImageOnCloudinary(
         file as Express.Multer.File
       );
-      restaurant.imgaeUrl = imageUrl;
+      restaurant.imageUrl = imageUrl;
     }
     await restaurant.save();
     return res.status(201).json({

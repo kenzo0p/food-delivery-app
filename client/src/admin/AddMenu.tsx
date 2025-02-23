@@ -14,6 +14,8 @@ import { Loader2, Plus } from "lucide-react";
 import React, {  FormEvent, useState } from "react";
 import EditMenu from "./EditMenu";
 import { MenuFormSchema, menuSchema } from "@/schema/menuSchema";
+import { useMenuStore } from "@/store/useMenuStore";
+import { useRestaurantStore } from "@/store/useRestaurantStore";
 
 const menus = [
   {
@@ -38,7 +40,7 @@ const menus = [
 
 const AddMenu = () => {
   const [input , setInput] = useState<MenuFormSchema>({
-    title:"",
+    name:"",
     description:"",
     price:0,
     image:undefined
@@ -47,22 +49,31 @@ const AddMenu = () => {
   const [selectedMenu, setSelectedMenu] = useState<any>();
   const [editOpen ,setEditOpen] = useState<boolean>(false);
   const [error ,setError] = useState<Partial<MenuFormSchema>>({});
-  const loading = false;
 
   const changeEventHandler = (e:React.ChangeEvent<HTMLInputElement>) => {
     const {name,value , type} = e.target;
     setInput({...input,[name]:type === 'number'? Number(value) : value});
   }
-  const submitHandler = (e:FormEvent<HTMLFormElement>) => {
+  const {loading , createMenu} = useMenuStore()
+  const {restaurant} = useRestaurantStore();
+  const submitHandler =async (e:FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(input);
-    const result = menuSchema.safeParse(input);
-    if(!result.success){
-      const fieldError = result.error.formErrors.fieldErrors;
-      setError(fieldError as Partial<MenuFormSchema>);
-      return;
+   try {
+    const formData = new FormData();
+    formData.append("name" , input.name);
+    formData.append("description" , input.description);
+    formData.append("price" , input.price.toString());
+    if(input.image){
+      formData.append("image" , input.image);
     }
+    await createMenu(formData);
+   } catch (error) {
+    console.log(error);
+   }
+    
     // api ka kam starts from here
+
   }
   return (
     <div className="max-w-6xl mx-auto my-10">
@@ -71,7 +82,7 @@ const AddMenu = () => {
           Available Menus
         </h1>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger>
+          <DialogTrigger asChild>
             <Button className="bg-orange hover:bg-hoverOrange">
               <Plus className="mr-2 " /> Add Menu
             </Button>
@@ -87,14 +98,14 @@ const AddMenu = () => {
               <div>
                 <Label>Name</Label>
                 <Input
-                  value={input.title}
+                  value={input.name}
                   onChange={changeEventHandler}
                   
                   type="text"
-                  name="title"
+                  name="name"
                   placeholder="Enter the menu name"
                 />
-                {error && <span className="text-red-600 text-xs font-bold">{error.title}</span>}
+                {error && <span className="text-red-600 text-xs font-bold">{error.name}</span>}
               </div>
               <div>
                 <Label>Description</Label>
@@ -121,7 +132,7 @@ const AddMenu = () => {
               <div>
                 <Label>Uplaod Menu Image</Label>
                 <Input type="file" name="image" onChange={(e) => setInput({...input,image:e.target.files?.[0] || undefined})} />
-                {error && <span className="text-red-600 text-xs font-bold">{error.image?.name || "Image is required"}</span>}
+                {error && <span className="text-red-600 text-xs font-bold">{error.image?.name}</span>}
               </div>
               <DialogFooter className="mt-5">
                 {loading ? (
@@ -130,7 +141,7 @@ const AddMenu = () => {
                     Please Wait
                   </Button>
                 ) : (
-                  <Button className="bg-orange hover:bg-hoverOrange ">
+                  <Button type="submit" className="bg-orange hover:bg-hoverOrange ">
                     Submit
                   </Button>
                 )}
@@ -139,26 +150,26 @@ const AddMenu = () => {
           </DialogContent>
         </Dialog>
       </div>
-      {menus.map((item :any, index:number) => (
+      {restaurant.menus.map((menu :any, index:number) => (
         <div key={index} className="mt-6 space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center md:space-x-4 md:p-4 p-2 shadow-md rounded-lg border">
+          <div className="flex flex-col md:flex-row md:menus-center md:space-x-4 md:p-4 p-2 shadow-md rounded-lg border">
             <img
-              src={item.image}
+              src={menu.image}
               alt=""
               className="object-cover md:h-24 md:w-24 h-16 w-full rounded-lg"
             />
             <div className="flex-1">
-              <h1 className="text-lg font-semibold text-gray-800">{item.title}</h1>
+              <h1 className="text-lg font-semibold text-gray-800">{menu.name}</h1>
               <p className="text-gray-600  text-sm">
-                {item.description}
+                {menu.description}
               </p>
               <h2 className="text-md font-semibold mt-2">
-                Price : <span className="text-[#D19254]">{item.price}</span>
+                Price : <span className="text-[#D19254]">{menu.price}</span>
               </h2>
             </div>
             <Button onClick={() => {
               setEditOpen(true);
-              setSelectedMenu(item);
+              setSelectedMenu(menu);
               }} size={"sm"} className="mt-2 bg-orange hover:bg-hoverOrange">
               Edit
             </Button>

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const menuSchema = z.object({
-  title: z.string().nonempty({ message: "Name is required" }),
+  name: z.string().nonempty({ message: "Name is required" }),
   description: z.string().nonempty({ message: "Description is required" }),
   price: z.number().min(0, { message: "Price can not be negative" }),
   image: z

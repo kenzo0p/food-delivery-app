@@ -3,6 +3,36 @@ import { toast } from "sonner";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+type MenuItem = {
+  _id:string;
+  name:string;
+  description:string;
+  price:number;
+  image:string;
+
+}
+
+
+type Restaurant = {
+  _id:string;
+  user:string;
+  restaurantName:string;
+  city:string;
+  country:string;
+  deliveryTime:number;
+}
+type RestaurantState = {
+  loading : boolean;
+  restaurant : null;
+  searchedRestaurant:null;
+  createRestaurant:(formData:FormData) => Promise<void>;
+  getRestaurant:() => Promise<void>;
+  updateRestaurant:(formData : FormData) => Promise<void>;
+  searchRestaurant:(searchText:string , searchQuery : string , selectedCuisines:any) => Promise<void>;
+  addMenuToRestaurant:(menu:MenuItem) => void
+  updateMenuToRestaurant:(menu:any) => void;
+}
+
 const API_ENDPOINT = import.meta.env.VITE_RESTAURANT_ENDPOINT;
 axios.defaults.withCredentials = true;
 if (!API_ENDPOINT) {
@@ -16,7 +46,7 @@ if (!API_ENDPOINT) {
 
 // }
 
-export const useRestaurantStore = create<any>()(
+export const useRestaurantStore = create<RestaurantState>()(
   persist(
     (set) => ({
       loading: false,
@@ -42,7 +72,7 @@ export const useRestaurantStore = create<any>()(
       },
       getRestaurant: async () => {
         try {
-          set({ laoding: true });
+          set({ loading: true });
           const response = await axios.get(`${API_ENDPOINT}/`);
           if (response.data.success) {
             set({ loading: false, restaurant: response.data.restaurant });
@@ -92,7 +122,7 @@ export const useRestaurantStore = create<any>()(
           set({ loading: false });
         }
       },
-      addMenuToRestaurant: (menu: any) => {
+      addMenuToRestaurant: (menu: MenuItem) => {
         set((state: any) => ({
           restaurant: state.restaurant
             ? { ...state.restaurant, menus: [...state.restaurant.menus, menu] }

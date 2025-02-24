@@ -1,17 +1,22 @@
 import { Link, useParams } from "react-router-dom";
 import FilterPage from "./FilterPage";
 import { Input } from "./ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Globe, MapPin, X } from "lucide-react";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { AspectRatio } from "./ui/aspect-ratio";
 import { Skeleton } from "./ui/skeleton";
+import { useRestaurantStore } from "@/store/useRestaurantStore";
 
 const SearchPage = () => {
   const params = useParams();
   const [searchQuery, setSearchQuery] = useState("");
+  const {searchRestaurant , searchedRestaurant} = useRestaurantStore();
+  useEffect(() => {
+    searchRestaurant(params.text! , searchQuery , );
+  }, [])
   return (
     <div className="max-w-7xl mx-auto my-10">
       <div className="flex flex-col md:flex-row justify-between gap-10">

@@ -1,62 +1,29 @@
+import { Orders } from "@/types/orderTypes";
+import { MenuItem, RestaurantState } from "@/types/restaurantTypes";
 import axios from "axios";
 import { toast } from "sonner";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-type MenuItem = {
-  _id:string;
-  name:string;
-  description:string;
-  price:number;
-  image:string;
-
-}
-
-
-type Restaurant = {
-  _id:string;
-  user:string;
-  restaurantName:string;
-  city:string;
-  country:string;
-  deliveryTime:number;
-}
-type RestaurantState = {
-  loading : boolean;
-  restaurant : null;
-  searchedRestaurant:null;
-  createRestaurant:(formData:FormData) => Promise<void>;
-  getRestaurant:() => Promise<void>;
-  updateRestaurant:(formData : FormData) => Promise<void>;
-  searchRestaurant:(searchText:string , searchQuery : string , selectedCuisines:any) => Promise<void>;
-  addMenuToRestaurant:(menu:MenuItem) => void
-  updateMenuToRestaurant:(menu:any) => void;
-}
-
-const API_ENDPOINT = import.meta.env.VITE_RESTAURANT_ENDPOINT;
-axios.defaults.withCredentials = true;
-if (!API_ENDPOINT) {
+const API_END_POINT = import.meta.env.VITE_RESTAURANT_ENDPOINT;
+if (!API_END_POINT) {
   throw new Error("RESTAURANT_ENDPOINT environment variable is not defined");
 }
-
-// type RestaurantState = {
-//     loading :boolean,
-//     restaurant:null,
-//     restaurantResult:null,
-
-// }
+axios.defaults.withCredentials = true;
 
 export const useRestaurantStore = create<RestaurantState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       loading: false,
       restaurant: null,
       searchedRestaurant: null,
-
+      appliedFilter: [],
+      singleRestaurant: null,
+      restaurantOrder: [],
       createRestaurant: async (formData: FormData) => {
         try {
           set({ loading: true });
-          const response = await axios.post(`${API_ENDPOINT}`, formData, {
+          const response = await axios.post(`${API_END_POINT}/`, formData, {
             headers: {
               "Content-Type": "multipart/form-data",
             },
@@ -73,7 +40,7 @@ export const useRestaurantStore = create<RestaurantState>()(
       getRestaurant: async () => {
         try {
           set({ loading: true });
-          const response = await axios.get(`${API_ENDPOINT}/`);
+          const response = await axios.get(`${API_END_POINT}/`);
           if (response.data.success) {
             set({ loading: false, restaurant: response.data.restaurant });
           }
@@ -87,7 +54,7 @@ export const useRestaurantStore = create<RestaurantState>()(
       updateRestaurant: async (formData: FormData) => {
         try {
           set({ loading: true });
-          const response = await axios.put(`${API_ENDPOINT}/`, formData, {
+          const response = await axios.put(`${API_END_POINT}/`, formData, {
             headers: {
               "Content-Type": "multipart/form-data",
             },
@@ -97,8 +64,8 @@ export const useRestaurantStore = create<RestaurantState>()(
             set({ loading: false });
           }
         } catch (error: any) {
-          set({ loading: false });
           toast.error(error.response.data.message);
+          set({ loading: false });
         }
       },
       searchRestaurant: async (
@@ -108,17 +75,19 @@ export const useRestaurantStore = create<RestaurantState>()(
       ) => {
         try {
           set({ loading: true });
+
           const params = new URLSearchParams();
           params.set("searchQuery", searchQuery);
-          params.set("selectedCuisines", selectedCuisines);
+          params.set("selectedCuisines", selectedCuisines.join(","));
+
+          // await new Promise((resolve) => setTimeout(resolve, 2000));
           const response = await axios.get(
-            `${API_ENDPOINT}/search/${searchText}?searchQuery=${searchQuery}?${params.toString()}`
+            `${API_END_POINT}/search/${searchText}?${params.toString()}`
           );
           if (response.data.success) {
-            console.log(response.data);
             set({ loading: false, searchedRestaurant: response.data });
           }
-        } catch (error: any) {
+        } catch (error) {
           set({ loading: false });
         }
       },
@@ -129,7 +98,7 @@ export const useRestaurantStore = create<RestaurantState>()(
             : null,
         }));
       },
-      updateMenuToRestaurant: (updatedMenu: any) => {
+      updateMenuToRestaurant: (updatedMenu: MenuItem) => {
         set((state: any) => {
           if (state.restaurant) {
             const updatedMenuList = state.restaurant.menus.map((menu: any) =>
@@ -142,7 +111,63 @@ export const useRestaurantStore = create<RestaurantState>()(
               },
             };
           }
+          // if state.restaruant is undefined then return state
+          return state;
         });
+      },
+      setAppliedFilter: (value: string) => {
+        set((state) => {
+          const isAlreadyApplied = state.appliedFilter.includes(value);
+          const updatedFilter = isAlreadyApplied
+            ? state.appliedFilter.filter((item) => item !== value)
+            : [...state.appliedFilter, value];
+          return { appliedFilter: updatedFilter };
+        });
+      },
+      resetAppliedFilter: () => {
+        set({ appliedFilter: [] });
+      },
+      getSingleRestaurant: async (restaurantId: string) => {
+        try {
+          const response = await axios.get(`${API_END_POINT}/${restaurantId}`);
+          if (response.data.success) {
+            set({ singleRestaurant: response.data.restaurant });
+          }
+        } catch (error) {}
+      },
+      getRestaurantOrders: async () => {
+        try {
+          const response = await axios.get(`${API_END_POINT}/order`);
+          if (response.data.success) {
+            set({ restaurantOrder: response.data.orders });
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      updateRestaurantOrder: async (orderId: string, status: string) => {
+        try {
+          const response = await axios.put(
+            `${API_END_POINT}/order/${orderId}/status`,
+            { status },
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          if (response.data.success) {
+            const updatedOrder = get().restaurantOrder.map((order: Orders) => {
+              return order._id === orderId
+                ? { ...order, status: response.data.status }
+                : order;
+            });
+            set({ restaurantOrder: updatedOrder });
+            toast.success(response.data.message);
+          }
+        } catch (error: any) {
+          toast.error(error.response.data.message);
+        }
       },
     }),
     {

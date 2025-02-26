@@ -192,7 +192,7 @@ export const useUserStore = create<UserState>()(
       },
       updateProfile: async (input: any) => {
         try {
-          set({ loading: true }); // Added loading state
+        
           const response = await axios.put(
             `${API_ENDPOINT}/profile/update`,
             input,
@@ -207,14 +207,11 @@ export const useUserStore = create<UserState>()(
             set({
               user: response.data.user,
               isAuthenticated: true,
-              loading: false,
             }); // Added loading: false
-          } else {
-            set({ loading: false }); // Added for unsuccessful response
-          }
+          } 
         } catch (error: any) {
           toast.error(error.response?.data?.message || "Profile update failed");
-          set({ loading: false }); // Added for error case
+       
         }
       },
     }),

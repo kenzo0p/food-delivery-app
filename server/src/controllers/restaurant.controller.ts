@@ -3,10 +3,12 @@ import { Restaurant } from "../models/restaurant.model";
 import { Multer } from "multer";
 import uploadImageOnCloudinary from "../utils/imageUpload";
 import { Order } from "../models/order.model";
-export const createRestaurant = async (req: Request, res: Response) :Promise<any> => {
+export const createRestaurant = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
-    const { restaurantName, city, country, deliveryTime, cuisines } =
-      req.body;
+    const { restaurantName, city, country, deliveryTime, cuisines } = req.body;
     const file = req.file;
     // console.log(file ,restaurantName, );
     const restaurant = await Restaurant.findOne({ user: req.id });
@@ -40,13 +42,20 @@ export const createRestaurant = async (req: Request, res: Response) :Promise<any
       .json({ message: "Interval server error", success: false });
   }
 };
-export const getRestaurant = async (req: Request, res: Response): Promise<any> => {
+export const getRestaurant = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
-    const restaurant = await Restaurant.findOne({ user: req.id }).populate('menus');
+    const restaurant = await Restaurant.findOne({ user: req.id }).populate(
+      "menus"
+    );
     if (!restaurant) {
-      return res
-        .status(404)
-        .json({ success: false, restaurant:[],message: "Restaurant not found" });
+      return res.status(404).json({
+        success: false,
+        restaurant: [],
+        message: "Restaurant not found",
+      });
     }
     return res.status(200).json({ restaurant, success: true });
   } catch (error) {
@@ -57,7 +66,10 @@ export const getRestaurant = async (req: Request, res: Response): Promise<any> =
   }
 };
 
-export const updateRestaurant = async (req: Request, res: Response) :Promise<any> => {
+export const updateRestaurant = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { restaurantName, city, country, deliveryTime, cuisines } = req.body;
     const file = req.file;
@@ -91,7 +103,10 @@ export const updateRestaurant = async (req: Request, res: Response) :Promise<any
       .json({ message: "Internal server error", success: false });
   }
 };
-export const getRestaurantOrder  = async (req: Request, res: Response) :Promise<any> => {
+export const getRestaurantOrder = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const restaurant = await Restaurant.findOne({ user: req.id });
     if (!restaurant) {
@@ -115,7 +130,10 @@ export const getRestaurantOrder  = async (req: Request, res: Response) :Promise<
       .json({ message: "Internal server error", success: false });
   }
 };
-export const updatedOrderStatus = async (req: Request, res: Response) :Promise<any> => {
+export const updatedOrderStatus = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
@@ -135,7 +153,10 @@ export const updatedOrderStatus = async (req: Request, res: Response) :Promise<a
       .json({ message: "Internal server error", succcess: false });
   }
 };
-export const searchRestaurant = async (req: Request, res: Response) :Promise<any> => {
+export const searchRestaurant = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const searchText = req.params.searchText || "";
     const searchQuery = (req.query.searchQuery as string) || "";
@@ -154,8 +175,8 @@ export const searchRestaurant = async (req: Request, res: Response) :Promise<any
     // filter based on the basis of searchQuery
     if (searchQuery) {
       query.$or = [
-        { restaurantName: { $regex: searchText, $options: "i" } },
-        { cuisines: { $regex: searchText, $options: "i" } }, // i means if its uppercase or lowercase doesnat matter
+        { restaurantName: { $regex: searchQuery, $options: "i" } },
+        { cuisines: { $regex: searchQuery, $options: "i" } }, // i means if its uppercase or lowercase does'nt matter
       ];
     }
     // console.log(query);
@@ -171,15 +192,18 @@ export const searchRestaurant = async (req: Request, res: Response) :Promise<any
       .json({ message: "Internal server error", success: false });
   }
 };
-export const getSingleRestaurant = async (req: Request, res: Response) :Promise<any> => {
+export const getSingleRestaurant = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const restaurantId = req.params.id;
-    const restaurant = await Restaurant.findOne({ restaurantId }).populate({
+    const restaurant = await Restaurant.findById( restaurantId ).populate({
       path: "menus",
       options: { createdAt: -1 },
     });
     if (!restaurant) {
-      return res.status(404).json({ message: "Resatauran not found" });
+      return res.status(404).json({ message: "Resataurant not found" });
     }
     return res.status(200).json({ success: true, restaurant });
   } catch (error) {

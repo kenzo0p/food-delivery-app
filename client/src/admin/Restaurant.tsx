@@ -64,11 +64,11 @@ const Restaurant = () => {
     const fetchRestaurant = async () => {
       await getRestaurant();
       setInput({
-        restaurantName:restaurant.restaurantName || "",
-        city: restaurant.city || "",
-        country: restaurant.country || "",
-        deliveryTime: restaurant.deliveryTime || 0,
-        cuisines: restaurant.cuisines ? restaurant.cuisines.map((cuisine : string) => cuisine):  [] ,
+        restaurantName:restaurant?.restaurantName || "",
+        city: restaurant?.city || "",
+        country: restaurant?.country || "",
+        deliveryTime: restaurant?.deliveryTime || 0,
+        cuisines: restaurant?.cuisines ? restaurant.cuisines.map((cuisine : string) => cuisine):  [] ,
         imageFile: undefined,
       });
     };

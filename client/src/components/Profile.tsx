@@ -1,30 +1,26 @@
-import {
-  Loader2,
-  LocateIcon,
-  Mail,
-  MapPin,
-  MapPinHouse,
-  Plus,
-} from "lucide-react";
+import { Loader2, Mail, MapPin, MapPinHouse, Plus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Input } from "./ui/input";
 import { FormEvent, useRef, useState } from "react";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
+import { useUserStore } from "@/store/useUserStore";
 
 const Profile = () => {
-  const loading = false;
   const imageRef = useRef<HTMLInputElement | null>(null);
-  const [selectedProfilePicture, setSelectedProfilePicture] =
-    useState<string>("");
+  const { user, updateProfile } = useUserStore();
+  const [isLoading, setIsloading] = useState<boolean>(false);
+  const [selectedProfilePicture, setSelectedProfilePicture] = useState<string>(
+    user?.profilePicture || ""
+  );
   const [profileData, setProfileData] = useState({
-    fullname: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    country: "",
-    profilePicture: "",
+    fullname: user?.fullname || "",
+    email: user?.email || "",
+    phone: user?.contact || "",
+    address: user?.address || "",
+    city: user?.city || "",
+    country: user?.country || "",
+    profilePicture: user?.profilePicture || "",
   });
   const fileChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -45,12 +41,19 @@ const Profile = () => {
     const { name, value } = e.target;
     setProfileData({ ...profileData, [name]: value });
   };
-  const updateProfileHandler = (e: FormEvent<HTMLFormElement>) => {
+  const updateProfileHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // console.log(profileData)
-    //TODO: api implementation
+    try {
+      setIsloading(true);
+      await updateProfile(profileData);
+      setIsloading(false);
+    } catch (error) {
+      setIsloading(false);
+      console.log(error);
+    }
   };
- 
+
   return (
     <form onSubmit={updateProfileHandler} className="max-w-7xl mx-auto my-5">
       <div className="flex items-center justify-between">
@@ -87,6 +90,7 @@ const Profile = () => {
           <div className="w-full">
             <Label>Email</Label>
             <input
+              disabled
               type="email"
               name="email"
               value={profileData.email}
@@ -137,7 +141,7 @@ const Profile = () => {
         </div>
       </div>
       <div className="text-center">
-        {loading ? (
+        {isLoading ? (
           <Button disabled className="bg-orange hover:bg-hoverOrange ">
             <Loader2 className="animate-spin mr-2 w-4 h-4" />
             Please wait

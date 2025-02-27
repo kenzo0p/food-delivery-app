@@ -12,9 +12,18 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { icons, Minus, Plus } from "lucide-react";
 import CheckoutConfirmPage from "./CheckoutConfirmPage,";
+import { useCartStore } from "@/store/useCartStore";
+import { MenuItem } from "@/types/restaurantTypes";
+import { CartItem, CartState } from "@/types/cartTypes";
+import { Item } from "@radix-ui/react-menubar";
 
 const Cart = () => {
   const [open, setOpen] = useState<boolean>(false);
+  const { cart, removeFromTheCart, incrementquantity, decrementquantity } =
+    useCartStore();
+  let totalAmount = cart.reduce((acc, elem) => {
+    return acc + elem.price * elem.quantity;
+  }, 0);
   return (
     <div className="flex flex-col max-w-7xl mx-auto my-10">
       <div className="flex justify-end">
@@ -32,58 +41,65 @@ const Cart = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow>
-            <TableCell>
-              <Avatar>
-                <AvatarImage src="" alt="" />
-                <AvatarFallback>PI</AvatarFallback>
-              </Avatar>
-            </TableCell>
-            <TableCell>Tandoori Biryani</TableCell>
-            <TableCell>80</TableCell>
-            <TableCell>
-              <div className="w-fit rounded-full flex item-center border border-gray-100 dark:border-gray-800 shadow-md">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full bg-gray-200"
-                >
-                  <Minus />
+          {cart.map((item: CartItem) => (
+            <TableRow>
+              <TableCell>
+                <Avatar>
+                  <AvatarImage src={item.image} alt="" />
+                  <AvatarFallback>PI</AvatarFallback>
+                </Avatar>
+              </TableCell>
+              <TableCell>{item.name}</TableCell>
+              <TableCell>{item.price}</TableCell>
+              <TableCell>
+                <div className="w-fit rounded-full flex item-center border border-gray-100 dark:border-gray-800 shadow-md">
+                  <Button
+                    onClick={() => decrementquantity(item._id)}
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full bg-gray-200"
+                  >
+                    <Minus />
+                  </Button>
+                  <Button
+                    disabled
+                    variant={"outline"}
+                    size={"icon"}
+                    className="border-none font-bold rounded-full"
+                  >
+                    {item.quantity}
+                  </Button>
+                  <Button
+                    onClick={() => incrementquantity(item._id)}
+                    variant={"outline"}
+                    size={"icon"}
+                    className="font-bold rounded-full bg-orange hover:bg-hoverOrange"
+                  >
+                    <Plus />
+                  </Button>
+                </div>
+              </TableCell>
+              <TableCell>{item.price * item.quantity} ₹</TableCell>
+              <TableCell className="text-right">
+                <Button onClick={() => removeFromTheCart(item._id)} size={"sm"} className="bg-orange hover:bg-hoverOrange ">
+                  Remove
                 </Button>
-                <Button
-                  disabled
-                  variant={"outline"}
-                  size={"icon"}
-                  className="border-none font-bold rounded-full"
-                >
-                  1
-                </Button>
-                <Button
-                  variant={"outline"}
-                  size={"icon"}
-                  className="font-bold rounded-full bg-orange hover:bg-hoverOrange"
-                >
-                  <Plus />
-                </Button>
-              </div>
-            </TableCell>
-            <TableCell>80 ₹</TableCell>
-            <TableCell className="text-right">
-              <Button size={"sm"} className="bg-orange hover:bg-hoverOrange ">
-                Remove
-              </Button>
-            </TableCell>
-          </TableRow>
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
         <TableFooter>
           <TableRow className="text-2xl font-bold">
-          <TableCell colSpan={5}>Total</TableCell>
-          <TableCell className="text-right">80 ₹</TableCell>
+            <TableCell colSpan={5}>Total</TableCell>
+            <TableCell className="text-right">{totalAmount} ₹</TableCell>
           </TableRow>
         </TableFooter>
       </Table>
       <div className="flex justify-end my-5">
-        <Button onClick={() => setOpen(true)} className="bg-orange hover:bg-hoverOrange">
+        <Button
+          onClick={() => setOpen(true)}
+          className="bg-orange hover:bg-hoverOrange"
+        >
           Proceed To Checkout
         </Button>
       </div>

@@ -4,9 +4,11 @@ import AvailableMenu from "./AvailableMenu";
 import { useRestaurantStore } from "@/store/useRestaurantStore";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useCartStore } from "@/store/useCartStore";
 
 const RestaurantDetail = () => {
   const params =  useParams();
+  
   const {singleRestaurant , getSingleRestaurant} = useRestaurantStore();
   useEffect(() => {
     getSingleRestaurant(params.id!);
@@ -35,7 +37,7 @@ const RestaurantDetail = () => {
               <div className="flex items-center gap-2 ">
                 <Timer className="w-5 h-5" />
                 <h1 className="flex items-center gap-2 font-medium">
-                  Delivery Time: <span className="text-[#D19254]">{singleRestaurant?.deliveryTime || NaN}</span>
+                  Delivery Time: <span className="text-[#D19254]">{singleRestaurant?.deliveryTime || "NA"}</span>
                 </h1>
               </div>
             </div>

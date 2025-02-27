@@ -145,7 +145,7 @@ export const updatedOrderStatus = async (
     }
     order.status = status;
     await order.save();
-    return res.status(200).json({ success: true, message: "Status updated" });
+    return res.status(200).json({ success: true, status :order.status ,message: "Status updated" });
   } catch (error) {
     console.log(error, "Error while updating status of order");
     return res
